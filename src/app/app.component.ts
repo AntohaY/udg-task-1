@@ -1,10 +1,57 @@
-import { Component } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, NgModule, OnInit } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import {
+  PreloadAllModules,
+  RouteReuseStrategy,
+  RouterModule,
+} from '@angular/router';
+
+import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { ItemService } from './shared/data-access/item.service';
 
 @Component({
   selector: 'app-root',
-  templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss'],
+  template: `
+    <ion-app>
+      <ion-router-outlet></ion-router-outlet>
+    </ion-app>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
-  constructor() {}
+export class AppComponent implements OnInit {
+  constructor(
+    private itemService: ItemService
+  ) {}
+
+  ngOnInit() {
+    this.itemService.load();
+  }
 }
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [
+    HttpClientModule,
+    BrowserModule,
+    IonicModule.forRoot(),
+    RouterModule.forRoot(
+      [
+        {
+          path: 'home',
+          loadChildren: () =>
+            import('./home/home.component').then((m) => m.HomeComponentModule),
+        },
+        {
+          path: '',
+          redirectTo: 'home',
+          pathMatch: 'full',
+        },
+      ],
+      { preloadingStrategy: PreloadAllModules }
+    ),
+  ],
+  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}

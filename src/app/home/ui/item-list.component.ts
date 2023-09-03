@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, NgModule, Output } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { InfiniteScrollCustomEvent, IonicModule } from '@ionic/angular';
 import { ItemCardComponentModule } from 'src/app/item//ui/item-card.component';
 import { Item } from 'src/app/shared/interfaces/item';
@@ -8,15 +9,24 @@ import { Item } from 'src/app/shared/interfaces/item';
     selector: 'app-item-list',
     template: `
         <ion-list>
-            <ion-item *ngFor="let item of items">
-                <app-item-card [item]="item"></app-item-card>
-            </ion-item>
+            <ion-grid>
+                <ion-row>
+                    <ion-col *ngFor="let item of items" size-sm="2" size-xs="4" size-lg="1">
+                        <app-item-card routerLink="/item/{{ item.itemId }}" [item]="item"></app-item-card>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
         </ion-list>
         <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
             <ion-infinite-scroll-content></ion-infinite-scroll-content>
         </ion-infinite-scroll>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    styles: [`
+        ion-grid {
+            --ion-grid-columns: 4;
+        }
+    `]
 })
 
 export class ItemListComponent {
@@ -33,7 +43,7 @@ export class ItemListComponent {
 }
 
 @NgModule({
-    imports: [CommonModule, IonicModule, ItemCardComponentModule],
+    imports: [CommonModule, IonicModule, ItemCardComponentModule, RouterModule],
     declarations: [ItemListComponent],
     exports: [ItemListComponent]
 })

@@ -43,10 +43,15 @@ export class AppComponent implements OnInit {
             import('./home/home.component').then((m) => m.HomeComponentModule),
         },
         {
+          path: 'item/:id',
+          loadChildren: () => 
+            import('./item/item.component').then((m) => m.ItemComponentModule),
+        },
+        {
           path: '',
           redirectTo: 'home',
           pathMatch: 'full',
-        },
+        },       
       ],
       { preloadingStrategy: PreloadAllModules }
     ),

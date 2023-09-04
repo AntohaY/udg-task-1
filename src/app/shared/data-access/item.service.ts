@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CSVService } from './csv.service';
-import { BehaviorSubject, Observable, map, shareReplay, switchMap, take, tap } from 'rxjs';
+import { BehaviorSubject, Observable, filter, map, shareReplay, switchMap, take, tap } from 'rxjs';
 import { Item } from '../interfaces/item';
 
 @Injectable({providedIn: 'root'})
@@ -33,6 +33,13 @@ export class ItemService {
     }),
     shareReplay(1)
   );
+
+  getItemById(id: string) {
+    return this.getItems().pipe(
+      filter((items) => items.length > 0),
+      map((items) => items.find((item) => item.itemId === id))
+    )
+  }
 
   getItems() {
     return this.sharedItems$;

@@ -5,10 +5,10 @@ import { Item } from '../interfaces/item';
 
 @Injectable({providedIn: 'root'})
 export class CSVService {
-    constructor(private httpClient: HttpClient) { }
+    constructor( private httpClient: HttpClient) { }
     
     #itemsHaveLoaded = false;
-    csv$ = from(this.httpClient.get('assets/Artikel.csv', {responseType: 'text'}))
+    csv$ = from(this.httpClient.get('assets/Artikel.csv', {responseType: 'text'})).pipe(shareReplay(1));
 
     loadItems$: Observable<any> = this.csv$.pipe(
         map((items) => {
@@ -21,7 +21,7 @@ export class CSVService {
                 let item = row.split(';');
     
                 newItem = {
-                    itemId: item[0],
+                    itemId: item[0].trim(),
                     itemName: item[1]?.replaceAll('"', '').trim(),
                     manufacturer: item[2]?.replaceAll('"', '').trim(),
                     description: item[3]?.replaceAll('"', '').trim(),
@@ -45,4 +45,32 @@ export class CSVService {
         tap(() => (this.#itemsHaveLoaded = true)),
         shareReplay(1)
     );
+
+    saveItems(items: Item[]) {
+        if (this.#itemsHaveLoaded) {
+            this.downloadFile(items);
+        }
+    }
+
+    downloadFile(data: any) {
+        const replacer = (key: any, value: any) => (value === null ? '' : value);
+        const header = Object.keys(data[0]);
+        const csv = data.map((row: any) =>
+          header
+            .map((fieldName) => JSON.stringify(row[fieldName], replacer))
+            .join(';')
+        );
+        csv.unshift(header.join(','));
+        const csvArray = csv.join('\r\n');
+      
+        const a = document.createElement('a');
+        const blob = new Blob([csvArray], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+      
+        a.href = url;
+        a.download = 'Artikel.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+    }
 }

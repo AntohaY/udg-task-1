@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CSVService } from './csv.service';
-import { BehaviorSubject, Observable, filter, map, shareReplay, switchMap, take, tap } from 'rxjs';
+import { BehaviorSubject, Observable, filter, map, shareReplay, switchMap, take } from 'rxjs';
 import { Item } from '../interfaces/item';
 
 @Injectable({providedIn: 'root'})
@@ -19,18 +19,10 @@ export class ItemService {
   }
 
   nextPage() {
-    this.pagination$.next(this.pagination$.value + 10);
+    this.pagination$.next(this.pagination$.value + 5);
   }
 
-  private sharedItems$: Observable<Item[]> = this.pagination$.pipe(
-    switchMap((pagination) => {
-      console.log(pagination)
-      return this.items$.pipe(
-        map((items) => {
-          return items.slice(0, pagination)
-        })
-      )
-    }),
+  private sharedItems$: Observable<Item[]> = this.items$.pipe(
     shareReplay(1)
   );
 
@@ -42,6 +34,41 @@ export class ItemService {
   }
 
   getItems() {
-    return this.sharedItems$;
+    return this.sharedItems$.pipe(
+      switchMap((items) => {
+        return this.pagination$.pipe(
+          map(pagination => {
+            return items.slice(0, pagination)
+          })
+      )})
+    );
+  }
+
+  addItem(item: Item) {
+    const newItem = {
+      ...item,
+      itemId: Date.now().toString(),
+    };
+    this.items$.next([...this.items$.value, newItem]);
+  }
+
+  editItem(id: string, editedData: Item) {
+    const modifiedItems = this.items$.value.map((item) =>
+      item.itemId === id
+        ? { ...item, itemName: editedData.itemName }
+        : item
+    );
+    this.items$.next(modifiedItems);
+  }
+
+  deleteItem(id: string) {
+    const modifiedItems = this.items$.value.filter(
+      (item) => item.itemId !== id
+    );
+    this.items$.next(modifiedItems);
+  }
+
+  saveCSV() {
+    this.csvService.saveItems(this.items$.value);
   }
 }

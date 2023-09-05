@@ -11,7 +11,7 @@ import { Item } from 'src/app/shared/interfaces/item';
         <ion-list>
             <ion-grid>
                 <ion-row>
-                    <ion-col *ngFor="let item of items" size-sm="2" size-xs="4" size-lg="1">
+                    <ion-col *ngFor="let item of items; trackBy: trackByFn" size-sm="2" size-xs="4" size-lg="1">
                         <app-item-card routerLink="/item/{{ item.itemId }}" [item]="item"></app-item-card>
                     </ion-col>
                 </ion-row>
@@ -32,7 +32,11 @@ import { Item } from 'src/app/shared/interfaces/item';
 export class ItemListComponent {
     @Input() items!: Item[];
     @Output() loadMoreItems = new EventEmitter();
-    constructor() { }
+    constructor() {}
+
+    trackByFn(index: number, item: Item) {
+        return item.itemId;
+    }
 
     onIonInfinite(ev: Event) {
         this.loadMoreItems.emit();

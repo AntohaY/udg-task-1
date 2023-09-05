@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, NgModule } from '@angular/core';
 import { IonRouterOutlet, IonicModule } from '@ionic/angular';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ItemService } from '../shared/data-access/item.service';
 import { BehaviorSubject, combineLatest, map, switchMap } from 'rxjs';
 import { FormModalComponentModule } from '../shared/ui/form-modal.component';
@@ -60,9 +60,7 @@ import { Item } from '../shared/interfaces/item';
                     >
                     <ng-template>
                         <app-form-modal
-                        [title]="
-                            itemIdBeingEdited$ ? 'Edit item' : 'Create item'
-                        "
+                        [title]="'Edit item'"
                         [formGroup]="itemForm"
                         (save)="editItem(vm.itemIdBeingEdited!)"
                         ></app-form-modal>
@@ -73,7 +71,6 @@ import { Item } from '../shared/interfaces/item';
     `,
     styles: [`
         .item-container {
-
             @media(min-width:801px) {
                 display: flex;
                 flex-direction: column;
@@ -81,8 +78,7 @@ import { Item } from '../shared/interfaces/item';
                 img {
                     align-self: center;
                 }
-            }
-            
+            } 
         }
     `]
 })
@@ -130,25 +126,27 @@ export class ItemComponent {
         image: [''],
     });
 
-    constructor(private fb: FormBuilder, private route: ActivatedRoute, private itemService: ItemService, public routerOutlet: IonRouterOutlet) { }
+    constructor(private fb: FormBuilder, private router: Router, private route: ActivatedRoute, private itemService: ItemService, public routerOutlet: IonRouterOutlet) { }
     
-    editItem(checklistItemId: string) {
-        // this.itemService.update(
-        //   checklistItemId,
-        //   this.itemForm.getRawValue()
-        // );
+    editItem(itemId: string) {
+        console.log(this.itemForm.getRawValue())
+        this.itemService.editItem(
+          itemId,
+          {itemId: itemId, ...this.itemForm.getRawValue()}
+        );
     }
 
     openEditModal(item: Item) {
         this.itemForm.patchValue({
-          itemName: item.itemName,
+          ...item
         });
         this.itemIdBeingEdited$.next(item.itemId);
         this.formModalIsOpen$.next(true);
     }
 
     deleteItem(id: string) {
-        // this.itemService.remove(id);
+        this.itemService.deleteItem(id);
+        this.router.navigate(['']);
     }
 
 }

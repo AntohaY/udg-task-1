@@ -48,6 +48,11 @@ export class AppComponent implements OnInit {
             import('./item/item.component').then((m) => m.ItemComponentModule),
         },
         {
+          path: 'graph',
+          loadChildren: () =>
+            import('./graph/ui/graph.component').then((m) => m.GraphComponentModule)
+        },
+        {
           path: '',
           redirectTo: 'home',
           pathMatch: 'full',

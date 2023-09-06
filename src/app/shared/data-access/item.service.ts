@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { CSVService } from './csv.service';
 import { BehaviorSubject, Observable, filter, map, shareReplay, switchMap, take } from 'rxjs';
 import { Item } from '../interfaces/item';
+import { GraphDataObject } from '../interfaces/graphDataObject';
 
 @Injectable({providedIn: 'root'})
 export class ItemService {
@@ -30,6 +31,37 @@ export class ItemService {
     return this.getItems().pipe(
       filter((items) => items.length > 0),
       map((items) => items.find((item) => item.itemId === id))
+    )
+  }
+
+  getGenderPercentageForGraph(): Observable<[GraphDataObject, GraphDataObject]> {
+    return this.items$.pipe(
+      map((items) => {
+        let herrenAmount = 0;
+        let damenAmount = 0;
+        items.forEach(item => {
+          if (item.gender === 'Herren') {
+            herrenAmount++;
+          } else {
+            damenAmount++;
+          }
+        });
+
+        const genderPercentageData: [GraphDataObject, GraphDataObject] = [
+          {
+            title: 'Herren',
+            value: herrenAmount 
+            // * 100 / items.length
+          },
+          {
+            title: 'Damen',
+            value: damenAmount 
+            // * 100 / items.length
+          }
+        ];
+
+        return genderPercentageData;
+      })
     )
   }
 

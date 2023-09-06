@@ -16,6 +16,7 @@ import { CSVService } from '../shared/data-access/csv.service';
       <ion-toolbar>
         <ion-title> Home </ion-title>
         <ion-buttons slot="end">
+            <ion-button fill="solid" color="warning" routerLink="/graph">Graph</ion-button>
             <ion-button fill="solid" color="danger" (click)="downloadCSV()">Download CSV file</ion-button>
             <ion-button fill="solid" color="success" (click)="openCreateModal()">Add item</ion-button>
         </ion-buttons>
